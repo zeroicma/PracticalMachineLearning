@@ -1,0 +1,49 @@
+rm(list=ls())                
+library(knitr)
+library(caret)
+library(rpart)
+library(rpart.plot)
+library(rattle)
+library(randomForest)
+library(corrplot)
+set.seed(12345)
+
+training <- read.csv(url("http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"))
+testing <- read.csv(url("http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"))
+inTrain  <- createDataPartition(training$classe, p=0.7, list=FALSE)
+TrainSet <- training[inTrain, ]
+TestSet  <- training[-inTrain, ]
+
+#remove NA value (NAV) from the data set prior to further proceeding
+NAV <- nearZeroVar(TrainSet)
+TrainSet <- TrainSet[, -NAV]
+TestSet  <- TestSet[, -NAV]
+
+#remove unmeaningful data based on their NA value percentage
+NAP <- sapply(TrainSet,function(x)mean(is.na(x)))>0.95
+TrainSet <- TrainSet[,NAP==FALSE]
+TestSet <- TestSet[,NAP==FALSE]
+
+#remove first 5 column variables
+TrainSet <- TrainSet[, -(1:5)]
+TestSet  <- TestSet[, -(1:5)]
+
+#train using random forest method
+set.seed(33333)
+controlRF <- trainControl(method="cv", number=3, verboseIter=FALSE)
+modFitRandForest <- train(classe ~ ., data=TrainSet, method="rf",trControl=controlRF)
+predictRandForest <- predict(modFitRandForest, newdata=TestSet)
+confMatRandForest <- confusionMatrix(predictRandForest, TestSet$classe)
+
+#train using generated boosted model
+set.seed(33333)
+controlGBM <- trainControl(method = "repeatedcv", number = 5, repeats = 1)
+modFitGBM  <- train(classe ~ ., data=TrainSet, method = "gbm",
+                    trControl = controlGBM, verbose = FALSE)
+predictGBM <- predict(modFitGBM, newdata=TestSet)
+confMatGBM <- confusionMatrix(predictGBM, TestSet$classe)
+confMatGBM
+
+#prediction for 20 test data
+predictionsRF <- predict(modFitRandForest, newdata=testing)
+predictionsRF
