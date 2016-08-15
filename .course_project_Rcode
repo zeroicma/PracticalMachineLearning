@@ -8,7 +8,6 @@ library(randomForest)
 library(corrplot)
 set.seed(12345)
 
-#import and partition the data set
 training <- read.csv(url("http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"))
 testing <- read.csv(url("http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"))
 inTrain  <- createDataPartition(training$classe, p=0.7, list=FALSE)
@@ -36,6 +35,15 @@ modFitRandForest <- train(classe ~ ., data=TrainSet, method="rf",trControl=contr
 predictRandForest <- predict(modFitRandForest, newdata=TestSet)
 confMatRandForest <- confusionMatrix(predictRandForest, TestSet$classe)
 
+#train using generated boosted model
+set.seed(33333)
+controlGBM <- trainControl(method = "repeatedcv", number = 5, repeats = 1)
+modFitGBM  <- train(classe ~ ., data=TrainSet, method = "gbm",
+                    trControl = controlGBM, verbose = FALSE)
+predictGBM <- predict(modFitGBM, newdata=TestSet)
+confMatGBM <- confusionMatrix(predictGBM, TestSet$classe)
+confMatGBM
+
 #prediction for 20 test data
-predictions <- predict(modFitRandForest, newdata=testing)
-predictions
+predictionsRF <- predict(modFitRandForest, newdata=testing)
+predictionsRF
