@@ -8,6 +8,7 @@ library(randomForest)
 library(corrplot)
 set.seed(12345)
 
+#import and partition the data set
 training <- read.csv(url("http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"))
 testing <- read.csv(url("http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"))
 inTrain  <- createDataPartition(training$classe, p=0.7, list=FALSE)
