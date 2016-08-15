@@ -1,28 +1,29 @@
-rm(list=ls())                
-library(knitr)
-library(caret)
-library(rpart)
-library(rpart.plot)
-library(rattle)
-library(randomForest)
-library(corrplot)
-set.seed(12345)
+rm(list=ls())
 
-training <- read.csv(url("http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"))
-testing <- read.csv(url("http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"))
-inTrain  <- createDataPartition(training$classe, p=0.7, list=FALSE)
-TrainSet <- training[inTrain, ]
-TestSet  <- training[-inTrain, ]
+library(knitr)  
+library(caret)  
+library(rpart)  
+library(rpart.plot)  
+library(rattle)  
+library(randomForest)  
+library(corrplot)  
+set.seed(12345)  
 
-#remove NA value (NAV) from the data set prior to further proceeding
-NAV <- nearZeroVar(TrainSet)
-TrainSet <- TrainSet[, -NAV]
-TestSet  <- TestSet[, -NAV]
+training <- read.csv(url("http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"))  
+testing <- read.csv(url("http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"))  
+inTrain  <- createDataPartition(training$classe, p=0.7, list=FALSE)  
+TrainSet <- training[inTrain, ]  
+TestSet  <- training[-inTrain, ]  
 
-#remove unmeaningful data based on their NA value percentage
-NAP <- sapply(TrainSet,function(x)mean(is.na(x)))>0.95
-TrainSet <- TrainSet[,NAP==FALSE]
-TestSet <- TestSet[,NAP==FALSE]
+###### remove NA value (NAV) from the data set prior to further proceeding
+NAV <- nearZeroVar(TrainSet)  
+TrainSet <- TrainSet[, -NAV]  
+TestSet  <- TestSet[, -NAV]  
+
+#####remove unmeaningful data based on their NA value percentage
+NAP <- sapply(TrainSet,function(x)mean(is.na(x)))>0.95  
+TrainSet <- TrainSet[,NAP==FALSE]  
+TestSet <- TestSet[,NAP==FALSE]  
 
 #remove first 5 column variables
 TrainSet <- TrainSet[, -(1:5)]
